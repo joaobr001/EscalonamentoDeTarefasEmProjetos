@@ -19,8 +19,20 @@ class GrafoProjeto:
                 nome = str(row['nome']).strip()
                 duracao = int(row['duracao'])
                 
-                # Adiciona o Vértice no grafo com seus atributos (peso)
-                self.grafo.add_node(tarefa_id, duracao=duracao, nome=nome)
+                # Suporte opcional a colunas adicionais de PERT (otimista, pessimista) e Recursos
+                otimista = int(row['duracao_otimista']) if 'duracao_otimista' in df.columns and pd.notna(row['duracao_otimista']) else max(1, round(duracao * 0.8))
+                pessimista = int(row['duracao_pessimista']) if 'duracao_pessimista' in df.columns and pd.notna(row['duracao_pessimista']) else round(duracao * 1.5)
+                recursos = int(row['recursos']) if 'recursos' in df.columns and pd.notna(row['recursos']) else 1
+                
+                # Adiciona o Vértice no grafo com todos os atributos
+                self.grafo.add_node(
+                    tarefa_id, 
+                    duracao=duracao, 
+                    nome=nome,
+                    duracao_otimista=otimista,
+                    duracao_pessimista=pessimista,
+                    recursos=recursos
+                )
                 
                 # Pega a lista de dependências separadas por vírgula
                 dependencias_str = str(row['dependencias'])

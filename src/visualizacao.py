@@ -48,3 +48,77 @@ class Visualizador:
         plt.savefig(caminho_saida, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"[*] Visualização Gráfica exportada com sucesso para: {caminho_saida}")
+
+    @staticmethod
+    def plotar_linha_tempo_textual(grafo, caminho_critico, agendamento=None):
+        """
+        Gera e exibe uma Linha do Tempo cronológica em formato de texto estruturado.
+        """
+        if agendamento is None:
+            agendamento = {}
+            for n in grafo.nodes():
+                agendamento[n] = (grafo.nodes[n].get('es', 0), grafo.nodes[n].get('ef', 0))
+                
+        # Ordena as tarefas pelo tempo de início, e se empatar, pelo tempo de término
+        tarefas_ordenadas = sorted(grafo.nodes(), key=lambda x: (agendamento.get(x, (0, 0))[0], agendamento.get(x, (0, 0))[1]))
+        
+        print("\n" + "="*80)
+        print(" LINHA DO TEMPO CRONOLÓGICA DO DESENVOLVIMENTO WEB ".center(80))
+        print("="*80)
+        
+        for t_id in tarefas_ordenadas:
+            inicio, fim = agendamento[t_id]
+            critica = t_id in caminho_critico
+            recursos = grafo.nodes[t_id].get('recursos', 1)
+            nome = grafo.nodes[t_id]['nome']
+            
+            status_str = "[CRÍTICA - GARGALO]" if critica else "[Normal]"
+            
+            # Mostra o intervalo de dias
+            print(f" ▶ [Dias {inicio:>2} a {fim:>2}] : {t_id:<4} - {nome:<31} | {status_str:<19} ({recursos} dev)")
+            
+        print("="*80 + "\n")
+
+
+    @staticmethod
+    def plotar_distribuicao_monte_carlo_ascii(duracoes):
+        """
+        Renderiza uma distribuição de frequências e probabilidade cumulativa
+        das durações obtidas na simulação de Monte Carlo.
+        """
+        from collections import Counter
+        
+        if not duracoes:
+            return
+            
+        contagem = Counter(duracoes)
+        valores_ordenados = sorted(contagem.keys())
+        n_sim = len(duracoes)
+        
+        print("\n" + "="*60)
+        print(" DISTRIBUIÇÃO E PROBABILIDADE ACUMULADA (MONTE CARLO) ".center(60))
+        print("="*60)
+        print(f" Duração Mínima: {min(duracoes)} dias")
+        print(f" Duração Média:  {sum(duracoes)/n_sim:.2f} dias")
+        print(f" Duração Máxima: {max(duracoes)} dias")
+        print("-" * 60)
+        print(" Prazo (Dias) | Frequência Relativa | Probal. Acumulada")
+        print("-" * 60)
+        
+        acumulado = 0
+        max_freq = max(contagem.values())
+        largura_max = 20
+        
+        for val in valores_ordenados:
+            freq = contagem[val]
+            pct = (freq / n_sim) * 100
+            acumulado += freq
+            pct_acum = (acumulado / n_sim) * 100
+            
+            blocos = int((freq / max_freq) * largura_max)
+            barra = "█" * blocos
+            
+            print(f" {val:>3} dias    | {barra:<20} ({pct:>4.1f}%) | {pct_acum:>5.1f}%")
+            
+        print("="*60 + "\n")
+
