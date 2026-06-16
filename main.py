@@ -5,7 +5,7 @@ from src.visualizacao import Visualizador
 
 def executar_sistema():
     print("="*60)
-    print(" SISTEMA DE ESCALONAMENTO DE TAREFAS (GRAFOS) ".center(60))
+    print(" SISTEMA DE ESCALONAMENTO DE TAREFAS (TEORIA DOS GRAFOS) ".center(60))
     print("="*60)
     
     # Define o caminho do arquivo de dados base
