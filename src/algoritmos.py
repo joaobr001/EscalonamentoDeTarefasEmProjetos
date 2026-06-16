@@ -170,7 +170,7 @@ class AlgoritmosGrafos:
                 tempo = min(em_andamento.values())
             else:
                 if pendentes:
-                    raise Exception("Erro no escalonamento de recursos: ciclo ou dependência irresolvível detectada.")
+                    raise Exception(f"A equipe de {limite_recursos} dev(s) é muito pequena para assumir a tarefa mais pesada restante.")
                 break
                 
         duracao_total = tempo

@@ -114,7 +114,10 @@ def executar_sistema():
             print(" SIMULAR RECURSOS RESTRITOS ".center(60))
             print("="*60)
             try:
-                limite = int(input("Digite o número máximo de desenvolvedores simultâneos: "))
+                entrada = input("Digite o número máximo de desenvolvedores simultâneos (ou Enter para voltar): ").strip()
+                if not entrada:
+                    continue
+                limite = int(entrada)
                 if limite <= 0:
                     raise ValueError
             except ValueError:
@@ -122,7 +125,13 @@ def executar_sistema():
                 input("\nPressione [Enter] para continuar...")
                 continue
                 
-            duracao_recursos, agendamento, _ = matematica.simular_recursos_restritos(limite)
+            try:
+                duracao_recursos, agendamento, _ = matematica.simular_recursos_restritos(limite)
+            except Exception as e:
+                print(f"\n[!] ERRO NA SIMULAÇÃO: {e}")
+                print("[!] Aumente o número de desenvolvedores ou diminua a exigência de alguma tarefa no CSV.")
+                input("\nPressione [Enter] para voltar ao menu...")
+                continue
             duracao_minima, caminho_critico, _ = matematica.calcular_caminho_critico()
             
             print("\n" + "="*75)
@@ -147,7 +156,9 @@ def executar_sistema():
             print(" SIMULAÇÃO DE MONTE CARLO ".center(60))
             print("="*60)
             try:
-                iteracoes_input = input("Número de simulações (padrão 1000): ").strip()
+                iteracoes_input = input("Número de simulações (padrão 1000, ou 0 para voltar): ").strip()
+                if iteracoes_input == "0":
+                    continue
                 n_sim = int(iteracoes_input) if iteracoes_input else 1000
                 if n_sim <= 0:
                     raise ValueError
@@ -189,14 +200,19 @@ def executar_sistema():
             for n in projeto.grafo.nodes():
                 print(f"  [{n}] {projeto.grafo.nodes[n]['nome']} (Duração atual: {projeto.grafo.nodes[n]['duracao']} dias)")
                 
-            t_escolhida = input("\nDigite o ID da tarefa para alterar (ex: T3): ").strip().upper()
+            t_escolhida = input("\nDigite o ID da tarefa para alterar (ex: T3) ou vazio para voltar: ").strip().upper()
+            if not t_escolhida:
+                continue
             if t_escolhida not in projeto.grafo.nodes():
                 print("[!] Tarefa não encontrada.")
                 input("\nPressione [Enter] para continuar...")
                 continue
                 
             try:
-                nova_dur = int(input(f"Digite a nova duração para {t_escolhida} (dias): "))
+                entrada_dur = input(f"Digite a nova duração para {t_escolhida} (dias) ou vazio para cancelar: ").strip()
+                if not entrada_dur:
+                    continue
+                nova_dur = int(entrada_dur)
                 if nova_dur < 0:
                     raise ValueError
             except ValueError:
