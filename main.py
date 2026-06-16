@@ -12,12 +12,21 @@ def executar_sistema():
     caminho_csv = os.path.join("data", "tarefas.csv")
     
     print("\n[Passo 1] Construindo o DAG a partir do arquivo CSV...")
-    projeto = GrafoProjeto(caminho_csv)
+    try:
+        projeto = GrafoProjeto(caminho_csv)
+    except FileNotFoundError as e:
+        print(f"[!] ERRO: {e}")
+        return
     
     # A verificação teórica se existem ciclos (se não houver, o programa segue)
     if not projeto.is_dag_valido():
-        print("[!] ERRO GRAVE: O Grafo não é acíclico! Encontramos ciclos nas dependências.")
+        print("[!] ERRO GRAVE: O Grafo não é acíclico! Encontramos ciclos nas dependências:")
+        ciclos = projeto.obter_ciclos()
+        for ciclo in ciclos:
+            print(f"    Ciclo Encontrado: {' -> '.join(ciclo)} -> {ciclo[0]}")
+        print("Corrija o arquivo CSV e tente novamente.")
         return
+        
     print("[*] DAG Validado! Não foram encontrados ciclos.")
     
     # Inicia a classe com a lógica matemática
@@ -29,12 +38,17 @@ def executar_sistema():
     print(" -> ".join(ordem_segura))
     
     print("\n[Passo 3] Cálculos do Método do Caminho Crítico (CPM):")
-    duracao_minima, caminho_critico = matematica.calcular_caminho_critico()
+    duracao_minima, caminho_critico, todas_folgas = matematica.calcular_caminho_critico()
     
     print(f"[*] Duração Mínima do Projeto Inteiro: {duracao_minima} dias")
-    print(f"[*] As Tarefas Críticas (Folga ZERO - Gargalo):")
+    print(f"\n[*] Caminho Crítico (Tarefas GARGALO - Folga ZERO):")
     print(" -> ".join(caminho_critico))
     
+    print(f"\n[*] Análise de Folgas (Slack) das demais tarefas:")
+    for tarefa, folga in todas_folgas.items():
+        if folga > 0:
+            print(f"    - A tarefa {tarefa} possui folga de {folga} dia(s).")
+            
     print("\n[Passo 4] Exportando a Visualização para Relatório e Slides...")
     Visualizador.plotar_grafo(projeto.grafo, caminho_critico, "grafo_projeto.png")
     

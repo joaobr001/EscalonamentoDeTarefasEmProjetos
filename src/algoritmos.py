@@ -43,7 +43,13 @@ class AlgoritmosGrafos:
             # PASSO 3: Cálculo da Folga (Slack) -> Late Start - Early Start
             G_temp.nodes[node]['folga'] = G_temp.nodes[node]['ls'] - G_temp.nodes[node]['es']
             
-        # PASSO 4: Identifica as tarefas críticas (As que têm Folga exata de 0)
-        caminho_critico = [n for n in G_temp.nodes if G_temp.nodes[n]['folga'] == 0]
+        # PASSO 4: Identifica as tarefas críticas e gera o dicionário completo de folgas
+        caminho_critico = []
+        todas_folgas = {}
+        for n in G_temp.nodes:
+            folga = G_temp.nodes[n]['folga']
+            todas_folgas[n] = folga
+            if folga == 0:
+                caminho_critico.append(n)
         
-        return duracao_total, caminho_critico
+        return duracao_total, caminho_critico, todas_folgas
