@@ -5,7 +5,7 @@ from src.visualizacao import Visualizador
 
 def executar_sistema():
     print("="*60)
-    print(" SISTEMA DE ESCALONAMENTO DE TAREFAS (GRAFOS) ")
+    print(" SISTEMA DE ESCALONAMENTO DE TAREFAS (GRAFOS) ".center(60))
     print("="*60)
     
     # Define o caminho do arquivo de dados base
@@ -53,7 +53,7 @@ def executar_sistema():
     Visualizador.plotar_grafo(projeto.grafo, caminho_critico, "grafo_projeto.png")
     
     print("\n" + "="*60)
-    print(" EXECUÇÃO CONCLUÍDA COM SUCESSO! ")
+    print(" EXECUÇÃO CONCLUÍDA COM SUCESSO! ".center(60))
     print("="*60)
 
 if __name__ == "__main__":
