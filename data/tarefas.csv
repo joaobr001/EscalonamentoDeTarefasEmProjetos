@@ -1,0 +1,11 @@
+id,nome,duracao,dependencias
+T1,Levantamento de Requisitos,5,
+T2,Design de Interface e UX,4,T1
+T3,Modelagem do Banco de Dados,3,T1
+T4,Configuração de Infraestrutura,2,T1
+T5,Desenvolvimento do Backend,10,"T3,T4"
+T6,Desenvolvimento do Frontend,8,"T2,T4"
+T7,Integração (Frontend + Backend),4,"T5,T6"
+T8,Bateria de Testes (QA),3,T7
+T9,Homologação com o Cliente,2,T8
+T10,Lançamento Oficial,1,T9
