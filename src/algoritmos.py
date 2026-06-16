@@ -1,6 +1,15 @@
+"""
+Módulo do Motor Matemático.
+Contém a implementação isolada de algoritmos de Teoria dos Grafos e 
+Pesquisa Operacional (CPM, Ordenação Topológica, Monte Carlo e RCPSP).
+"""
 import networkx as nx
 
 class AlgoritmosGrafos:
+    """
+    Classe que recebe um grafo validado e executa os cálculos matemáticos avançados
+    de gestão de cronogramas.
+    """
     def __init__(self, projeto_grafo):
         # Acessa o atributo 'grafo' que criamos na classe GrafoProjeto
         self.G = projeto_grafo.grafo

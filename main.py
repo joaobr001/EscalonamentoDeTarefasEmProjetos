@@ -44,6 +44,11 @@ def imprimir_tabela_tarefas(grafo, caminho_critico, todas_folgas):
         print("-" * 105)
 
 def executar_sistema():
+    """
+    Ponto de entrada principal do sistema CLI.
+    Lida com o carregamento do grafo, validação inicial de ciclos (DAG)
+    e controla o loop principal do menu interativo de escolhas.
+    """
     limpar_tela()
     caminho_csv = os.path.join("data", "tarefas.csv")
     
@@ -88,6 +93,11 @@ def executar_sistema():
         
         opcao = input("\nEscolha uma opção (1-6): ").strip()
         
+        # =======================================================
+        # OPÇÃO 1: RELATÓRIO GERAL (CPM CLÁSSICO)
+        # Calcula o Caminho Crítico determinístico, gera o
+        # cronograma cronológico e a tabela detalhada de folgas.
+        # =======================================================
         if opcao == "1":
             limpar_tela()
             duracao_minima, caminho_critico, todas_folgas = matematica.calcular_caminho_critico()
@@ -108,6 +118,11 @@ def executar_sistema():
             Visualizador.plotar_linha_tempo_textual(projeto.grafo, caminho_critico)
             input("\nPressione [Enter] para voltar ao menu...")
             
+        # =======================================================
+        # OPÇÃO 2: SIMULAÇÃO DE RECURSOS (RCPSP)
+        # Escalona as tarefas respeitando um limite máximo de devs,
+        # priorizando tarefas com menor folga matemática.
+        # =======================================================
         elif opcao == "2":
             limpar_tela()
             print("\n" + "="*60)
@@ -150,6 +165,11 @@ def executar_sistema():
             Visualizador.plotar_linha_tempo_textual(projeto.grafo, caminho_critico, agendamento)
             input("\nPressione [Enter] para voltar ao menu...")
             
+        # =======================================================
+        # OPÇÃO 3: MONTE CARLO (PERT ESTOCÁSTICO)
+        # Simula o projeto N vezes usando durações aleatórias para
+        # prever a probabilidade estatística de atrasos e gargalos.
+        # =======================================================
         elif opcao == "3":
             limpar_tela()
             print("\n" + "="*60)
@@ -191,6 +211,11 @@ def executar_sistema():
             Visualizador.plotar_distribuicao_monte_carlo_ascii(duracoes_sim)
             input("\nPressione [Enter] para voltar ao menu...")
             
+        # =======================================================
+        # OPÇÃO 4: ANÁLISE DE SENSIBILIDADE (WHAT-IF)
+        # Permite alterar a duração de um nó isolado e recalcula o
+        # CPM para medir o impacto no prazo de entrega do projeto.
+        # =======================================================
         elif opcao == "4":
             limpar_tela()
             print("\n" + "="*60)
@@ -260,6 +285,11 @@ def executar_sistema():
             print("="*65 + "\n")
             input("\nPressione [Enter] para voltar ao menu...")
             
+        # =======================================================
+        # OPÇÃO 5: EXPORTAÇÃO DO GRAFO (PNG)
+        # Renderiza visualmente os vértices e dependências, pintando
+        # a rota crítica com destaque em vermelho usando Matplotlib.
+        # =======================================================
         elif opcao == "5":
             limpar_tela()
             print("\n" + "="*60)

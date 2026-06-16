@@ -1,7 +1,17 @@
+"""
+Módulo de Modelagem do Grafo.
+Responsável por converter os dados do projeto (CSV) em uma estrutura matemática
+de Grafo Direcionado Acíclico (DAG) utilizando a biblioteca NetworkX.
+"""
 import pandas as pd
 import networkx as nx
 
 class GrafoProjeto:
+    """
+    Classe central que representa a rede do projeto. 
+    Gerencia os Vértices (tarefas com seus pesos de duração e recursos) 
+    e as Arestas Direcionadas (dependências lógicas).
+    """
     def __init__(self, caminho_csv):
         self.caminho_csv = caminho_csv
         self.grafo = nx.DiGraph()

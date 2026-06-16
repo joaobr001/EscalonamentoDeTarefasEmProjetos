@@ -1,7 +1,16 @@
+"""
+Módulo de Saída Visual.
+Responsável por gerar artefatos visuais gráficos (PNG) e textuais (ASCII/Gantt)
+para apresentar os resultados dos algoritmos matemáticos ao usuário.
+"""
 import matplotlib.pyplot as plt
 import networkx as nx
 
 class Visualizador:
+    """
+    Classe utilitária puramente estática que isola a lógica de plotagem
+    de dados (Matplotlib e formatação em console).
+    """
     @staticmethod
     def plotar_grafo(grafo, caminho_critico, caminho_saida="grafo_projeto.png"):
         """Gera e salva um diagrama de rede do projeto inteiro."""
