@@ -35,17 +35,15 @@ class Visualizador:
         # 3. Separar as Arestas comuns das Arestas críticas
         arestas_criticas = []
         arestas_comuns = []
-        for (u, v) in grafo.edges():
+        for u, v in grafo.edges():
             if u in caminho_critico and v in caminho_critico:
                 arestas_criticas.append((u, v))
             else:
                 arestas_comuns.append((u, v))
                 
-        # 4. Desenha as "Setinhas" normais
-        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_comuns, arrows=True, arrowsize=20)
-        
-        # 5. Desenha as "Setinhas" críticas bem destacadas em vermelho
-        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_criticas, width=3.0, edge_color='red', arrows=True, arrowsize=25)
+        # 4. Desenha as Setas (Arestas)
+        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_comuns, width=1.5, edge_color='gray', arrows=True, arrowsize=15)
+        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_criticas, width=3.0, edge_color='#ff3333', arrows=True, arrowsize=20)
         
         # Título para o gráfico
         plt.title("DAG: Escalonamento de Tarefas Web\n(Vermelho = Caminho Crítico)", fontsize=16)
@@ -56,8 +54,7 @@ class Visualizador:
         # Salva o arquivo de imagem no computador
         plt.savefig(caminho_saida, dpi=300, bbox_inches='tight')
         plt.close()
-        print(f"[*] Visualização Gráfica exportada com sucesso para: {caminho_saida}")
-
+        
     @staticmethod
     def plotar_linha_tempo_textual(grafo, caminho_critico, agendamento=None):
         """
@@ -87,7 +84,6 @@ class Visualizador:
             print(f" ▶ [Dias {inicio:>2} a {fim:>2}] : {t_id:<4} - {nome:<31} | {status_str:<19} ({recursos} dev)")
             
         print("="*80 + "\n")
-
 
     @staticmethod
     def plotar_distribuicao_monte_carlo_ascii(duracoes):
@@ -131,3 +127,46 @@ class Visualizador:
             
         print("="*60 + "\n")
 
+    @staticmethod
+    def plotar_grafo_agendado(grafo, agendamento, caminho_saida="grafo_agendado.png"):
+        """
+        Gera um diagrama de rede com os rótulos das tarefas atualizados 
+        com os dias de início e término exatos após restrição de recursos.
+        """
+        plt.figure(figsize=(14, 8))
+        pos = nx.spring_layout(grafo, seed=42)
+        
+        # Cor diferente para mostrar que é um grafo restrito
+        node_colors = ['#ffcc99' for node in grafo.nodes()]
+        
+        labels = {}
+        for node in grafo.nodes():
+            ini, fim = agendamento.get(node, (0, 0))
+            labels[node] = f"{node}\n(Dia {ini} ao {fim})"
+            
+        nx.draw_networkx_nodes(grafo, pos, node_size=3500, node_color=node_colors, edgecolors='black')
+        nx.draw_networkx_labels(grafo, pos, labels=labels, font_size=9, font_weight='bold')
+        nx.draw_networkx_edges(grafo, pos, arrows=True, arrowsize=20)
+        
+        plt.title("DAG: Escalonamento com Restrição de Recursos\n(Mostrando os Dias de Início e Término Reais)", fontsize=16)
+        plt.axis('off')
+        plt.tight_layout()
+        plt.savefig(caminho_saida, dpi=300, bbox_inches='tight')
+        plt.close()
+        print(f"[*] Grafo agendado exportado com sucesso para: {caminho_saida}")
+
+    @staticmethod
+    def plotar_histograma_monte_carlo_png(duracoes, caminho_saida="histograma_monte_carlo.png"):
+        """
+        Gera e salva um histograma em PNG das simulações de Monte Carlo.
+        """
+        plt.figure(figsize=(10, 6))
+        plt.hist(duracoes, bins=15, color='#99ccff', edgecolor='black', alpha=0.8)
+        plt.title("Distribuição de Probabilidade do Prazo do Projeto (Monte Carlo)", fontsize=14)
+        plt.xlabel("Duração Total do Projeto (Dias)", fontsize=12)
+        plt.ylabel("Frequência Absoluta das Ocorrências", fontsize=12)
+        plt.grid(axis='y', alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(caminho_saida, dpi=300, bbox_inches='tight')
+        plt.close()
+        print(f"[*] Histograma exportado com sucesso para: {caminho_saida}")

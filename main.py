@@ -51,6 +51,7 @@ def executar_sistema():
     """
     limpar_tela()
     caminho_csv = os.path.join("data", "tarefas.csv")
+    os.makedirs("imagens", exist_ok=True)
     
     print("="*60)
     print(" SISTEMA DE ESCALONAMENTO DE TAREFAS (DESENVOLVIMENTO WEB) ".center(60))
@@ -163,6 +164,12 @@ def executar_sistema():
                 
             # Linha de tempo textual sob restrição de recursos
             Visualizador.plotar_linha_tempo_textual(projeto.grafo, caminho_critico, agendamento)
+            
+            exportar = input("Deseja exportar o diagrama de rede com este agendamento restrito? (s/n): ").strip().lower()
+            if exportar == 's':
+                nome_arquivo = os.path.join("imagens", f"grafo_recursos_{limite}_devs.png")
+                Visualizador.plotar_grafo_agendado(projeto.grafo, agendamento, nome_arquivo)
+                
             input("\nPressione [Enter] para voltar ao menu...")
             
         # =======================================================
@@ -209,6 +216,11 @@ def executar_sistema():
                 
             # Plot da distribuição
             Visualizador.plotar_distribuicao_monte_carlo_ascii(duracoes_sim)
+            
+            exportar = input("Deseja exportar o histograma de probabilidade em PNG? (s/n): ").strip().lower()
+            if exportar == 's':
+                Visualizador.plotar_histograma_monte_carlo_png(duracoes_sim, os.path.join("imagens", "histograma_monte_carlo.png"))
+                
             input("\nPressione [Enter] para voltar ao menu...")
             
         # =======================================================
@@ -283,6 +295,16 @@ def executar_sistema():
             if set(crit_antes) != set(crit_depois):
                 print("[!] Alerta: O caminho crítico do projeto MUDOU com esta alteração!")
             print("="*65 + "\n")
+            
+            exportar = input("Deseja exportar o grafo com essa simulação? (s/n): ").strip().lower()
+            if exportar == 's':
+                # Re-aplica a mutação rapidamente apenas para plotagem
+                projeto.grafo.nodes[t_escolhida]['duracao'] = nova_dur
+                nome_arquivo = os.path.join("imagens", f"grafo_simulado_{t_escolhida}.png")
+                Visualizador.plotar_grafo(projeto.grafo, crit_depois, nome_arquivo)
+                # Restaura para a segurança do estado
+                projeto.grafo.nodes[t_escolhida]['duracao'] = dur_anterior
+            
             input("\nPressione [Enter] para voltar ao menu...")
             
         # =======================================================
@@ -296,8 +318,9 @@ def executar_sistema():
             print(" EXPORTAR DIAGRAMA DE REDE ".center(60))
             print("="*60)
             _, crit, _ = matematica.calcular_caminho_critico()
-            Visualizador.plotar_grafo(projeto.grafo, crit, "grafo_projeto.png")
-            print("\n[*] Grafo atualizado exportado com sucesso para: 'grafo_projeto.png'")
+            caminho_saida = os.path.join("imagens", "grafo_projeto.png")
+            Visualizador.plotar_grafo(projeto.grafo, crit, caminho_saida)
+            print(f"\n[*] Grafo atualizado exportado com sucesso para: '{caminho_saida}'")
             input("\nPressione [Enter] para voltar ao menu...")
             
         elif opcao == "6":
