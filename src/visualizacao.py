@@ -190,3 +190,74 @@ class Visualizador:
         plt.savefig(caminho_saida, dpi=300, bbox_inches='tight')
         plt.close()
         print(f"[*] Histograma exportado com sucesso para: {caminho_saida}")
+
+    @staticmethod
+    def plotar_matrizes(grafo, caminho_saida_adj="imagens/matriz_adjacencia.png", caminho_saida_inc="imagens/matriz_incidencia.png"):
+        """
+        Gera visualizações em forma de mapa de calor (Heatmap) para as Matrizes de Adjacência e Incidência.
+        """
+        import os
+        os.makedirs("imagens", exist_ok=True)
+        
+        nodelist = list(grafo.nodes())
+        
+        import numpy as np
+        
+        # ==========================================
+        # 1. Matriz de Adjacência
+        # ==========================================
+        adj_matrix = nx.to_numpy_array(grafo, nodelist=nodelist)
+        
+        plt.figure(figsize=(10, 8))
+        plt.imshow(adj_matrix, cmap='Blues', interpolation='none')
+        cbar = plt.colorbar(label='Conexão (0 = Nulo, 1 = Dependência)')
+        cbar.set_ticks([0, 1])
+        plt.xticks(ticks=range(len(nodelist)), labels=nodelist, rotation=45)
+        plt.yticks(ticks=range(len(nodelist)), labels=nodelist)
+        plt.title("Matriz de Adjacência do Projeto", fontsize=16, fontweight='bold', pad=20)
+        
+        # Adicionar os números dentro dos quadrados
+        for i in range(len(nodelist)):
+            for j in range(len(nodelist)):
+                val = int(adj_matrix[i, j])
+                cor_texto = 'white' if val > 0 else 'black'
+                plt.text(j, i, str(val), ha='center', va='center', color=cor_texto, fontweight='bold')
+                         
+        plt.tight_layout()
+        plt.savefig(caminho_saida_adj, dpi=300, bbox_inches='tight')
+        plt.close()
+
+        # ==========================================
+        # 2. Matriz de Incidência
+        # ==========================================
+        edgelist = list(grafo.edges())
+        inc_matrix = np.zeros((len(nodelist), len(edgelist)))
+        for j, (u, v) in enumerate(edgelist):
+            u_idx = nodelist.index(u)
+            v_idx = nodelist.index(v)
+            inc_matrix[u_idx, j] = -1  # Aresta saindo (Tail)
+            inc_matrix[v_idx, j] = 1   # Aresta entrando (Head)
+        
+        # Criar rótulos para as arestas (ex: T1->T2)
+        edge_labels = [f"e{idx+1}\n({u}->{v})" for idx, (u, v) in enumerate(edgelist)]
+        
+        plt.figure(figsize=(14, 8))
+        plt.imshow(inc_matrix, cmap='coolwarm', interpolation='none', vmin=-1, vmax=1)
+        cbar = plt.colorbar(label='Direção (-1 = Sai, 1 = Entra, 0 = Nulo)')
+        cbar.set_ticks([-1, 0, 1])
+        plt.xticks(ticks=range(len(edgelist)), labels=edge_labels, rotation=45, ha='right', fontsize=9)
+        plt.yticks(ticks=range(len(nodelist)), labels=nodelist)
+        plt.title("Matriz de Incidência Direcionada (DAG)", fontsize=16, fontweight='bold', pad=20)
+        
+        # Adicionar os números dentro dos quadrados
+        for i in range(len(nodelist)):
+            for j in range(len(edgelist)):
+                val = int(inc_matrix[i, j])
+                cor_texto = 'white' if abs(val) > 0 else 'black'
+                plt.text(j, i, str(val), ha='center', va='center', color=cor_texto, fontweight='bold')
+                         
+        plt.tight_layout()
+        plt.savefig(caminho_saida_inc, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        print(f"[*] Matrizes visuais exportadas com sucesso para a pasta 'imagens/'.")

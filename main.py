@@ -81,18 +81,18 @@ def executar_sistema():
     
     while True:
         limpar_tela()
-        print("\n" + "="*45)
-        print(" MENU PRINCIPAL ".center(45))
-        print("="*45)
+        print("=============================================")
+        print("                MENU PRINCIPAL               ")
+        print("=============================================")
         print("1. Relatório Geral do Projeto (CPM Determinístico)")
         print("2. Simular Restrição de Recursos (Equipe de Devs)")
         print("3. Executar Simulação de Monte Carlo (PERT Estocástico)")
         print("4. Análise de Sensibilidade ('E Se?' - Modificar Duração)")
         print("5. Exportar Diagrama de Rede (Grafo PNG)")
-        print("6. Sair")
-        print("="*45)
-        
-        opcao = input("\nEscolha uma opção (1-6): ").strip()
+        print("6. Exportar Matrizes Matemáticas do Grafo (Adjacência e Incidência)")
+        print("7. Sair")
+        print("=============================================")
+        opcao = input("\nEscolha uma opção (1-7): ").strip()
         
         # =======================================================
         # OPÇÃO 1: RELATÓRIO GERAL (CPM CLÁSSICO)
@@ -324,12 +324,24 @@ def executar_sistema():
             print(f"\n[*] Grafo atualizado exportado com sucesso para: '{caminho_saida}'")
             input("\nPressione [Enter] para voltar ao menu...")
             
+        # =======================================================
+        # OPÇÃO 6: EXPORTAR MATRIZES MATEMÁTICAS (ADJACÊNCIA/INCIDÊNCIA)
+        # =======================================================
         elif opcao == "6":
+            limpar_tela()
+            print("\n" + "="*60)
+            print(" GERANDO MATRIZES MATEMÁTICAS (GRAFOS) ".center(60))
+            print("="*60)
+            print("[*] Renderizando Matriz de Adjacência e de Incidência...")
+            Visualizador.plotar_matrizes(projeto.grafo)
+            input("\nPressione [Enter] para voltar ao menu...")
+            
+        elif opcao == "7":
             limpar_tela()
             print("\nObrigado por usar o Sistema de Escalonamento de Tarefas. Até mais!\n")
             break
         else:
-            print("[!] Opção inválida. Digite um número de 1 a 6.")
+            print("[!] Opção inválida. Digite um número de 1 a 7.")
             input("\nPressione [Enter] para voltar ao menu...")
 
 if __name__ == "__main__":
