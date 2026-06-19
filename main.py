@@ -54,7 +54,7 @@ def executar_sistema():
     os.makedirs("imagens", exist_ok=True)
     
     print("="*60)
-    print(" SISTEMA DE ESCALONAMENTO DE TAREFAS (DESENVOLVIMENTO WEB) ".center(60))
+    print(" SISTEMA DE ESCALONAMENTO DE TAREFAS EM PROJETOS".center(60))
     print("="*60)
     
     try:
@@ -301,7 +301,8 @@ def executar_sistema():
                 # Re-aplica a mutação rapidamente apenas para plotagem
                 projeto.grafo.nodes[t_escolhida]['duracao'] = nova_dur
                 nome_arquivo = os.path.join("imagens", f"grafo_simulado_{t_escolhida}.png")
-                Visualizador.plotar_grafo(projeto.grafo, crit_depois, nome_arquivo)
+                titulo_mutacao = f"DAG: Simulação de Sensibilidade (What-If)\nMutação Injetada na Tarefa {t_escolhida} (Nova Duração: {nova_dur}d)"
+                Visualizador.plotar_grafo(projeto.grafo, crit_depois, nome_arquivo, titulo=titulo_mutacao)
                 # Restaura para a segurança do estado
                 projeto.grafo.nodes[t_escolhida]['duracao'] = dur_anterior
             

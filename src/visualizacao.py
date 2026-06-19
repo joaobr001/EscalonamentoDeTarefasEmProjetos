@@ -5,6 +5,8 @@ para apresentar os resultados dos algoritmos matemáticos ao usuário.
 """
 import matplotlib.pyplot as plt
 import networkx as nx
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 
 class Visualizador:
     """
@@ -12,7 +14,7 @@ class Visualizador:
     de dados (Matplotlib e formatação em console).
     """
     @staticmethod
-    def plotar_grafo(grafo, caminho_critico, caminho_saida="grafo_projeto.png"):
+    def plotar_grafo(grafo, caminho_critico, caminho_saida="grafo_projeto.png", titulo="DAG: Grafo Ideal de Escalonamento (CPM)\nCenário Base de Planejamento"):
         """Gera e salva um diagrama de rede do projeto inteiro."""
         # Cria uma figura de bom tamanho para leitura no relatório
         plt.figure(figsize=(14, 8))
@@ -24,13 +26,18 @@ class Visualizador:
         node_colors = ['#ff6666' if node in caminho_critico else '#99ccff' for node in grafo.nodes()]
         
         # Dicionário com os textos que vão aparecer dentro de cada bolinha
-        labels = {node: f"{node}\n({grafo.nodes[node]['duracao']}d)" for node in grafo.nodes()}
+        labels = {}
+        for node in grafo.nodes():
+            duracao = grafo.nodes[node]['duracao']
+            folga = grafo.nodes[node].get('folga', 0)
+            recursos = grafo.nodes[node].get('recursos', 1)
+            labels[node] = f"{node}\n{duracao}d\n{recursos} Devs\nFolga: {folga}d"
         
         # 1. Desenha as "Bolinhas"
-        nx.draw_networkx_nodes(grafo, pos, node_size=3000, node_color=node_colors, edgecolors='black')
+        nx.draw_networkx_nodes(grafo, pos, node_size=5000, node_color=node_colors, edgecolors='black')
         
         # 2. Desenha os Textos
-        nx.draw_networkx_labels(grafo, pos, labels=labels, font_size=10, font_weight='bold')
+        nx.draw_networkx_labels(grafo, pos, labels=labels, font_size=9, font_weight='bold')
         
         # 3. Separar as Arestas comuns das Arestas críticas
         arestas_criticas = []
@@ -45,8 +52,16 @@ class Visualizador:
         nx.draw_networkx_edges(grafo, pos, edgelist=arestas_comuns, width=1.5, edge_color='gray', arrows=True, arrowsize=15)
         nx.draw_networkx_edges(grafo, pos, edgelist=arestas_criticas, width=3.0, edge_color='#ff3333', arrows=True, arrowsize=20)
         
-        # Título para o gráfico
-        plt.title("DAG: Escalonamento de Tarefas Web\n(Vermelho = Caminho Crítico)", fontsize=16)
+        # Título dinâmico para o gráfico
+        plt.title(titulo, fontsize=16, fontweight='bold')
+        
+        # 5. Adicionar Legenda Visual (Movida para o canto inferior direito para não tampar a T2)
+        patch_normal = mpatches.Patch(color='#99ccff', label='Tarefa Normal (Possui Folga)')
+        patch_critica = mpatches.Patch(color='#ff6666', label='Tarefa Crítica (Sem Folga / Gargalo)')
+        line_critica = mlines.Line2D([], [], color='#ff3333', linewidth=3.0, label='Caminho Crítico')
+        
+        # Colocando a legenda no canto inferior direito
+        plt.legend(handles=[patch_normal, patch_critica, line_critica], loc='lower right', fontsize=10, framealpha=0.9)
         
         plt.axis('off')
         plt.tight_layout()
@@ -142,13 +157,18 @@ class Visualizador:
         labels = {}
         for node in grafo.nodes():
             ini, fim = agendamento.get(node, (0, 0))
-            labels[node] = f"{node}\n(Dia {ini} ao {fim})"
+            labels[node] = f"{node}\nDia {ini}\nao {fim}"
             
-        nx.draw_networkx_nodes(grafo, pos, node_size=3500, node_color=node_colors, edgecolors='black')
+        nx.draw_networkx_nodes(grafo, pos, node_size=5000, node_color=node_colors, edgecolors='black')
         nx.draw_networkx_labels(grafo, pos, labels=labels, font_size=9, font_weight='bold')
         nx.draw_networkx_edges(grafo, pos, arrows=True, arrowsize=20)
         
-        plt.title("DAG: Escalonamento com Restrição de Recursos\n(Mostrando os Dias de Início e Término Reais)", fontsize=16)
+        plt.title("DAG: Cronograma sob Restrição de Equipe (RCPSP)\n(Dias Reais de Alocação calculados via Heurística LPT)", fontsize=16, fontweight='bold')
+        
+        # Adicionar Legenda Visual
+        patch_restrito = mpatches.Patch(color='#ffcc99', label='Tarefa (Sob efeito da Restrição)')
+        plt.legend(handles=[patch_restrito], loc='upper left', fontsize=10, framealpha=0.9)
+        
         plt.axis('off')
         plt.tight_layout()
         plt.savefig(caminho_saida, dpi=300, bbox_inches='tight')
@@ -162,7 +182,7 @@ class Visualizador:
         """
         plt.figure(figsize=(10, 6))
         plt.hist(duracoes, bins=15, color='#99ccff', edgecolor='black', alpha=0.8)
-        plt.title("Distribuição de Probabilidade do Prazo do Projeto (Monte Carlo)", fontsize=14)
+        plt.title("Simulação de Risco (Monte Carlo) / PERT Estocástico\nDistribuição de Probabilidade do Prazo do Projeto", fontsize=14, fontweight='bold')
         plt.xlabel("Duração Total do Projeto (Dias)", fontsize=12)
         plt.ylabel("Frequência Absoluta das Ocorrências", fontsize=12)
         plt.grid(axis='y', alpha=0.3)
