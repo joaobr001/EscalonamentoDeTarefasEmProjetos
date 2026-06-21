@@ -49,8 +49,8 @@ class Visualizador:
                 arestas_comuns.append((u, v))
                 
         # 4. Desenha as Setas (Arestas)
-        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_comuns, width=1.5, edge_color='gray', arrows=True, arrowsize=15)
-        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_criticas, width=3.0, edge_color='#ff3333', arrows=True, arrowsize=20)
+        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_comuns, width=1.5, edge_color='gray', arrows=True, arrowsize=15, node_size=5000)
+        nx.draw_networkx_edges(grafo, pos, edgelist=arestas_criticas, width=3.0, edge_color='#ff3333', arrows=True, arrowsize=20, node_size=5000)
         
         # Título dinâmico para o gráfico
         plt.title(titulo, fontsize=16, fontweight='bold')
@@ -161,7 +161,7 @@ class Visualizador:
             
         nx.draw_networkx_nodes(grafo, pos, node_size=5000, node_color=node_colors, edgecolors='black')
         nx.draw_networkx_labels(grafo, pos, labels=labels, font_size=9, font_weight='bold')
-        nx.draw_networkx_edges(grafo, pos, arrows=True, arrowsize=20)
+        nx.draw_networkx_edges(grafo, pos, arrows=True, arrowsize=20, node_size=5000)
         
         plt.title("DAG: Cronograma sob Restrição de Equipe (RCPSP)\n(Dias Reais de Alocação calculados via Heurística LPT)", fontsize=16, fontweight='bold')
         
