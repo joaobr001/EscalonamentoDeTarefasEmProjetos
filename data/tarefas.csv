@@ -1,11 +1,11 @@
-id,nome,duracao,duracao_otimista,duracao_pessimista,recursos,dependencias
-T1,Levantamento de Requisitos,15,10,25,2,
-T2,Design de Interface e UX,20,14,30,2,T1
-T3,Modelagem do Banco de Dados,10,7,15,2,T1
-T4,Configuração de Infraestrutura,8,5,12,2,T1
-T5,Desenvolvimento do Backend,40,30,55,4,"T3,T4"
-T6,Desenvolvimento do Frontend,35,25,50,3,"T2,T4"
-T7,Integração (Frontend + Backend),15,10,20,3,"T5,T6"
-T8,Bateria de Testes (QA),15,10,25,3,T7
-T9,Homologação com o Cliente,10,5,15,2,T8
-T10,Lançamento Oficial,5,3,8,3,T9
+id , nome                           , duracao, duracao_otimista, duracao_pessimista, recursos, dependencias
+T1 , Levantamento de Requisitos     ,      15,               10,                 25,        2, 
+T2 , Design de Interface e UX       ,      20,               14,                 30,        2, T1
+T3 , Modelagem do Banco de Dados    ,      10,                7,                 15,        2, T1
+T4 , Configuração de Infraestrutura ,       8,                5,                 12,        2, T1
+T5 , Desenvolvimento do Backend     ,      40,               30,                 55,        4, "T3,T4"
+T6 , Desenvolvimento do Frontend    ,      35,               25,                 50,        3, "T2,T4"
+T7 , Integração (Frontend + Backend),      15,               10,                 20,        3, "T5,T6"
+T8 , Bateria de Testes (QA)         ,      15,               10,                 25,        3, T7
+T9 , Homologação com o Cliente      ,      10,                5,                 15,        2, T8
+T10, Lançamento Oficial             ,       5,                3,                  8,        3, T9

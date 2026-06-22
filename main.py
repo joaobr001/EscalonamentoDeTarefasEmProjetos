@@ -15,19 +15,29 @@ def limpar_tela():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def imprimir_tabela_tarefas(grafo, caminho_critico, todas_folgas):
+    """
+    Imprime uma tabela formatada no terminal detalhando todas as tarefas do projeto.
+    Se a biblioteca 'tabulate' estiver instalada, usa um formato de grade avançado (fancy_grid).
+    Caso contrário, faz o fallback manual com formatação de strings do Python.
+    
+    Args:
+        grafo (nx.DiGraph): O grafo do projeto contendo os atributos de cada nó.
+        caminho_critico (list): Lista de nós (tarefas) que pertencem ao caminho crítico.
+        todas_folgas (dict): Dicionário mapeando cada tarefa para a sua respectiva folga (slack) calculada.
+    """
     tabela = []
     for n in grafo.nodes():
         info = grafo.nodes[n]
         critica = "CRÍTICA" if n in caminho_critico else "Normal"
         
         tabela.append([
-            n,
-            info.get('nome', ''),
-            f"{info['duracao']} dias",
-            f"{info.get('duracao_otimista', '?')}/{info.get('duracao', '?')}/{info.get('duracao_pessimista', '?')}",
-            f"{info.get('recursos', 1)} dev(s)",
-            f"{todas_folgas.get(n, 0)} dias",
-            critica
+            n, # ID da tarefa (ex: T1)
+            info.get('nome', ''), # Nome descritivo da tarefa
+            f"{info['duracao']} dias", # Duração provável
+            f"{info.get('duracao_otimista', '?')}/{info.get('duracao', '?')}/{info.get('duracao_pessimista', '?')}", # Tempos de PERT
+            f"{info.get('recursos', 1)} recurso(s)", # Esforço exigido
+            f"{todas_folgas.get(n, 0)} dias", # Margem de atraso permitida sem afetar o projeto
+            critica # Status
         ])
     
     headers = ["ID", "Nome da Tarefa", "Duração", "Otim/Prov/Pess", "Recursos", "Folga", "Status"]
@@ -85,7 +95,7 @@ def executar_sistema():
         print("                MENU PRINCIPAL               ")
         print("=============================================")
         print("1. Relatório Geral do Projeto (CPM Determinístico)")
-        print("2. Simular Restrição de Recursos (Equipe de Devs)")
+        print("2. Simular Restrição de Recursos")
         print("3. Executar Simulação de Monte Carlo (PERT Estocástico)")
         print("4. Análise de Sensibilidade ('E Se?' - Modificar Duração)")
         print("5. Exportar Diagrama de Rede (Grafo PNG)")
@@ -130,7 +140,7 @@ def executar_sistema():
             print(" SIMULAR RECURSOS RESTRITOS ".center(60))
             print("="*60)
             try:
-                entrada = input("Digite o número máximo de desenvolvedores simultâneos (ou Enter para voltar): ").strip()
+                entrada = input("Digite a quantidade máxima de recursos simultâneos (ou Enter para voltar): ").strip()
                 if not entrada:
                     continue
                 limite = int(entrada)
@@ -145,29 +155,29 @@ def executar_sistema():
                 duracao_recursos, agendamento, _ = matematica.simular_recursos_restritos(limite)
             except Exception as e:
                 print(f"\n[!] ERRO NA SIMULAÇÃO: {e}")
-                print("[!] Aumente o número de desenvolvedores ou diminua a exigência de alguma tarefa no CSV.")
+                print("[!] Aumente a quantidade de recursos ou diminua a exigência de alguma tarefa no CSV.")
                 input("\nPressione [Enter] para voltar ao menu...")
                 continue
             duracao_minima, caminho_critico, _ = matematica.calcular_caminho_critico()
             
             print("\n" + "="*75)
-            print(f" ESCALONAMENTO COM RESTRIÇÃO DE RECURSOS ({limite} DEVS) ".center(75))
+            print(f" ESCALONAMENTO COM RESTRIÇÃO DE RECURSOS ({limite} UNID) ".center(75))
             print("="*75)
-            print(f"[*] Duração teórica mínima (sem limite de devs): {duracao_minima} dias")
-            print(f"[*] Duração real simulada (com restrição de devs): {duracao_recursos} dias")
+            print(f"[*] Duração teórica mínima (sem limite de recursos): {duracao_minima} dias")
+            print(f"[*] Duração real simulada (com restrição de recursos): {duracao_recursos} dias")
             
             atraso = duracao_recursos - duracao_minima
             if atraso > 0:
-                print(f"[!] IMPACTO: A falta de devs gerou um gargalo de recursos que atrasou o projeto em {atraso} dia(s).")
+                print(f"[!] IMPACTO: A falta de recursos gerou um gargalo que atrasou o projeto em {atraso} dia(s).")
             else:
-                print("[*] IMPACTO: A equipe de devs é perfeitamente dimensionada. Nenhuma tarefa sofreu atraso.")
+                print("[*] IMPACTO: A quantidade de recursos é perfeitamente dimensionada. Nenhuma tarefa sofreu atraso.")
                 
             # Linha de tempo textual sob restrição de recursos
             Visualizador.plotar_linha_tempo_textual(projeto.grafo, caminho_critico, agendamento)
             
             exportar = input("Deseja exportar o diagrama de rede com este agendamento restrito? (s/n): ").strip().lower()
             if exportar == 's':
-                nome_arquivo = os.path.join("imagens", f"grafo_recursos_{limite}_devs.png")
+                nome_arquivo = os.path.join("imagens", f"grafo_recursos_{limite}.png")
                 Visualizador.plotar_grafo_agendado(projeto.grafo, agendamento, nome_arquivo)
                 
             input("\nPressione [Enter] para voltar ao menu...")
@@ -263,14 +273,14 @@ def executar_sistema():
             # Calcula o estado antes da mudança
             dur_antes, crit_antes, _ = matematica.calcular_caminho_critico()
             
-            # Aplica a alteração temporária
-            projeto.grafo.nodes[t_escolhida]['duracao'] = nova_dur
+            # Aplica a alteração usando um grafo temporário para não corromper o estado em caso de erro
+            G_simulado = projeto.grafo.copy()
+            G_simulado.nodes[t_escolhida]['duracao'] = nova_dur
+            alg_temp = AlgoritmosGrafos.__new__(AlgoritmosGrafos)
+            alg_temp.G = G_simulado
             
-            # Recalcula o estado com a nova duração
-            dur_depois, crit_depois, _ = matematica.calcular_caminho_critico()
-            
-            # Restaura o original
-            projeto.grafo.nodes[t_escolhida]['duracao'] = dur_anterior
+            # Recalcula o estado com a nova duração no grafo temporário
+            dur_depois, crit_depois, _ = alg_temp.calcular_caminho_critico()
             
             # Apresenta os resultados da simulação "E Se?"
             print("\n" + "="*65)
@@ -298,13 +308,10 @@ def executar_sistema():
             
             exportar = input("Deseja exportar o grafo com essa simulação? (s/n): ").strip().lower()
             if exportar == 's':
-                # Re-aplica a mutação rapidamente apenas para plotagem
-                projeto.grafo.nodes[t_escolhida]['duracao'] = nova_dur
+                # Usa o grafo temporário simulado para plotagem
                 nome_arquivo = os.path.join("imagens", f"grafo_simulado_{t_escolhida}.png")
                 titulo_mutacao = f"DAG: Simulação de Sensibilidade (What-If)\nMutação Injetada na Tarefa {t_escolhida} (Nova Duração: {nova_dur}d)"
-                Visualizador.plotar_grafo(projeto.grafo, crit_depois, nome_arquivo, titulo=titulo_mutacao)
-                # Restaura para a segurança do estado
-                projeto.grafo.nodes[t_escolhida]['duracao'] = dur_anterior
+                Visualizador.plotar_grafo(G_simulado, crit_depois, nome_arquivo, titulo=titulo_mutacao)
             
             input("\nPressione [Enter] para voltar ao menu...")
             

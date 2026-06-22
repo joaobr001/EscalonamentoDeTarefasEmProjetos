@@ -4,6 +4,7 @@ Contém a implementação isolada de algoritmos de Teoria dos Grafos e
 Pesquisa Operacional (CPM, Ordenação Topológica, Monte Carlo e RCPSP).
 """
 import networkx as nx
+import random
 
 class AlgoritmosGrafos:
     """
@@ -15,11 +16,19 @@ class AlgoritmosGrafos:
         self.G = projeto_grafo.grafo
 
     def obter_ordenacao_topologica(self):
-        """Gera a lista segura de tarefas baseada em pré-requisitos."""
+        """
+        Gera uma lista linear (ordenação topológica) onde cada tarefa aparece 
+        apenas depois de todos os seus pré-requisitos lógicos serem cumpridos.
+        Útil para garantir que o projeto seja executado de forma sequencial válida.
+        """
         return list(nx.topological_sort(self.G))
 
     def calcular_caminho_critico(self):
-        """Executa a matemática do CPM (Ida e Volta) para achar o gargalo."""
+        """
+        Executa a matemática do Critical Path Method (CPM) em duas fases (Ida e Volta).
+        Identifica o "gargalo" do projeto: a sequência de tarefas que, se atrasar 1 dia, 
+        atrasará o projeto inteiro (folga = 0).
+        """
         # PASSO 1: Forward Pass (Ida) - Tempo mais cedo (Early Start e Early Finish)
         for node in nx.topological_sort(self.G):
             es = 0 # Early Start começa no Dia 0
@@ -67,7 +76,6 @@ class AlgoritmosGrafos:
         triangular de PERT (otimista, provável, pessimista).
         Retorna as durações simuladas e a criticidade de cada tarefa.
         """
-        import random
         
         duracoes_simuladas = []
         contador_critico = {node: 0 for node in self.G.nodes()}
@@ -88,7 +96,7 @@ class AlgoritmosGrafos:
                 if otimista == pessimista:
                     duracao_amostrada = provavel
                 else:
-                    duracao_amostrada = random.triangular(otimista, provavel, pessimista)
+                    duracao_amostrada = random.triangular(otimista, pessimista, provavel)
                 
                 G_temp.nodes[node]['duracao'] = round(duracao_amostrada)
             
@@ -126,12 +134,21 @@ class AlgoritmosGrafos:
     def simular_recursos_restritos(self, limite_recursos):
         """
         Escalona tarefas respeitando a ordenação do grafo e um limite estrito 
-        de recursos simultâneos (desenvolvedores). Retorna a duração total, 
+        de recursos simultâneos. Retorna a duração total, 
         o agendamento individual e o histórico de uso de recursos.
         """
         # Primeiro calculamos o CPM determinístico para usar a folga como prioridade
         _, _, folgas = self.calcular_caminho_critico()
         
+        # Validação prévia: nenhuma tarefa pode exigir mais do que o limite de recursos sozinha
+        for t_id in self.G.nodes():
+            req_rec = self.G.nodes[t_id].get('recursos', 1)
+            if req_rec > limite_recursos:
+                raise Exception(
+                    f"A tarefa '{t_id}' ({self.G.nodes[t_id].get('nome', '')}) exige {req_rec} recurso(s), "
+                    f"mas o limite máximo informado é {limite_recursos} recurso(s)."
+                )
+
         # Tarefas pendentes
         pendentes = list(self.G.nodes())
         # Estado de cada tarefa
@@ -179,7 +196,7 @@ class AlgoritmosGrafos:
                 tempo = min(em_andamento.values())
             else:
                 if pendentes:
-                    raise Exception(f"A equipe de {limite_recursos} dev(s) é muito pequena para assumir a tarefa mais pesada restante.")
+                    raise Exception(f"A quantidade de {limite_recursos} recurso(s) é muito pequena para assumir a tarefa mais pesada restante.")
                 break
                 
         duracao_total = tempo

@@ -18,10 +18,15 @@ class GrafoProjeto:
         self.carregar_dados()
 
     def carregar_dados(self):
-        """Lê o arquivo CSV e constrói os Vértices (Tarefas) e Arestas (Dependências)."""
+        """
+        Lê o arquivo CSV de entrada e constrói a estrutura matemática do grafo.
+        Cada linha do CSV é convertida em um Vértice (Tarefa) com pesos (Duração, Recursos),
+        e as dependências indicadas na coluna são convertidas em Arestas Direcionadas.
+        """
         try:
             # Carrega os dados preenchendo as dependências em branco com string vazia
-            df = pd.read_csv(self.caminho_csv)
+            df = pd.read_csv(self.caminho_csv, skipinitialspace=True)
+            df.columns = df.columns.str.strip()
             df['dependencias'] = df['dependencias'].fillna('')
             
             for index, row in df.iterrows():
@@ -57,11 +62,21 @@ class GrafoProjeto:
             raise FileNotFoundError(f"Arquivo não encontrado: {self.caminho_csv}. Verifique se a pasta 'data' existe e contém o arquivo 'tarefas.csv'.")
 
     def is_dag_valido(self):
-        """Valida matematicamente se não existem ciclos de dependência."""
+        """
+        Valida matematicamente se o grafo gerado é um Directed Acyclic Graph (DAG).
+        Isso é vital em Gerenciamento de Projetos, pois ciclos indicariam dependências 
+        infinitas (ex: T1 depende de T2, que depende de T1), o que é impossível de resolver.
+        
+        Returns:
+            bool: True se não houver ciclos, False caso contrário.
+        """
         return nx.is_directed_acyclic_graph(self.grafo)
 
     def obter_ciclos(self):
-        """Retorna uma lista com os ciclos encontrados, para facilitar a correção no CSV."""
+        """
+        Retorna uma lista com os ciclos lógicos encontrados no grafo,
+        o que facilita imensamente o debug e a correção por parte do usuário no CSV.
+        """
         try:
             return list(nx.simple_cycles(self.grafo))
         except nx.NetworkXNoCycle:
